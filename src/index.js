@@ -11,11 +11,15 @@ const cors = require("cors");
 const main = require("./config/database");
 console.log("Mongo URI Loaded:", Boolean(process.env.MONGO_URI));
 const authRouter = require("./Routes/userAuthenticate");
-const projectRouter = require("./Routes/userProject")
+const projectRouter = require("./Routes/userProject");
+const payRouter = require("./Routes/userPayment");
 
 const app = express();
 
 const PORT = process.env.PORT || 4000;
+
+// console.log("Razorpay Key ID:", process.env.RAZORPAY_KEY_ID);
+// console.log("Secret exists:", Boolean(process.env.RAZORPAY_KEY_SECRET));
 
 // Middleware
 app.use(express.json());
@@ -31,6 +35,7 @@ app.use(
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api", projectRouter);
+app.use("/api",payRouter);
 
 // Start server after database connection
 const startServer = async () => {

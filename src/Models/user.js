@@ -42,6 +42,17 @@ const userSchema = new Schema(
       enum: ["free", "pro", "premium"],
       default: "free",
     },
+
+    billingCycle: {
+    type: String,
+    enum: ["monthly", "yearly", null],
+    default: null,
+    },
+
+  planExpiresAt: {
+      type: Date,
+      default: null,
+  },
   },
   {
     timestamps: true,
