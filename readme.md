@@ -16,7 +16,6 @@
 
 The **Webloom API** powers a prompt-to-website workflow. It authenticates users using JWT cookies, persists website projects and conversations in MongoDB, requests AI-generated website code through OpenRouter, tracks generation credits, and includes Razorpay payment integration modules.
 
-> **Accuracy note:** This README combines the provided source tree with known project decisions. Controller implementations, route names, payment verification details, and deployment behavior should be checked against the current code before treating them as a published API contract.
 
 ## Capabilities
 
