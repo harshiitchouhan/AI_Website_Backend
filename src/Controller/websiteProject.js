@@ -192,9 +192,19 @@ const parseAIResponse = (rawContent) => {
         const styleCount = (html.match(/<style\b[^>]*>/gi) || []).length;
         const scriptCount = (html.match(/<script\b[^>]*>/gi) || []).length;
 
-        if (styleCount !== 1 || scriptCount !== 1) {
-            throw new AIOutputError("AI must return one style tag and one script tag");
+        // A self-contained generated website should include its CSS.
+        if (styleCount === 0) {
+            throw new AIOutputError(
+                "AI generated HTML without an embedded CSS style tag"
+            );
         }
+
+        // Multiple style and script tags are valid HTML.
+        // JavaScript is optional for static websites.
+        console.log("AI HTML Validation:", {
+            styleCount,
+            scriptCount,
+        });
 
         return {
             message:
