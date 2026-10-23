@@ -25,12 +25,30 @@ const PORT = process.env.PORT || 4000;
 app.use(express.json());
 app.use(cookieParser());
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(
     cors({
-        origin: "http://localhost:5173",
-        credentials: true
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+
+            callback(new Error("Not allowed by CORS"));
+        },
+        credentials: true,
     })
 );
+
+app.get("/api/health", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Webloom API is running",
+    });
+});
 
 // Routes
 app.use("/api/auth", authRouter);
@@ -52,3 +70,13 @@ const startServer = async () => {
 };
 
 startServer();
+
+if (require.main === module) {
+    const PORT = process.env.PORT || 4000;
+
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = app;
