@@ -7,6 +7,7 @@ require("dotenv").config({
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const mongoose = require("mongoose");
 
 const main = require("./config/database");
 console.log("Mongo URI Loaded:", Boolean(process.env.MONGO_URI));
@@ -50,33 +51,59 @@ app.get("/api/health", (req, res) => {
     });
 });
 
+// MongoDB connection middleware
+let dbConnectionPromise = null;
+
+app.use("/api", async (req, res, next) => {
+    try {
+        if (mongoose.connection.readyState !== 1) {
+            if (!dbConnectionPromise) {
+                dbConnectionPromise = main().finally(() => {
+                    dbConnectionPromise = null;
+                });
+            }
+
+            await dbConnectionPromise;
+        }
+
+        next();
+    } catch (error) {
+        console.error("Database Connection Error:", error.message);
+
+        return res.status(503).json({
+            success: false,
+            message: "Database connection unavailable",
+        });
+    }
+});
+
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api", projectRouter);
-app.use("/api",payRouter);
+app.use("/api", payRouter);
 
 // Start server after database connection
-const startServer = async () => {
-    try {
-        await main();
+// const startServer = async () => {
+//     try {
+//         await main();
 
-        app.listen(PORT, () => {
-            console.log(`Server Running on Port ${PORT}`);
-        });
-    } catch (error) {
-        console.error("Failed to start server:", error.message);
+//         app.listen(PORT, () => {
+//             console.log(`Server Running on Port ${PORT}`);
+//         });
+//     } catch (error) {
+//         console.error("Failed to start server:", error.message);
 
-    }
-};
+//     }
+// };
 
-startServer();
+// startServer();
 
+// Start server only during local development
 if (require.main === module) {
-    const PORT = process.env.PORT || 4000;
-
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 }
 
+// Export Express app for Vercel
 module.exports = app;
